@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace SqlApp21.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
         private readonly IConfiguration _configuration;
 
@@ -13,7 +13,11 @@ namespace SqlApp21.Services
         private static string db_password = "Azure@123";
         private static string db_database = "appdb";
 
-        private SqlConnection GetConnection()
+        public ProductService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        private SqlConnection GetConnection1()
         {
             var _builder = new SqlConnectionStringBuilder();
             _builder.DataSource = db_source;
@@ -22,16 +26,16 @@ namespace SqlApp21.Services
             _builder.InitialCatalog = db_database;
 
             return new SqlConnection(_builder.ConnectionString);
-            //return new SqlConnection(_configuration.GetConnectionString("SqlConnection"));
+        }
+        private SqlConnection GetConnection2()
+        {
+            var connString = _configuration.GetConnectionString("SqlConnectionString");
+            return new SqlConnection(connString);
         }
 
-        private SqlConnection GetConnection1()
-        {
-            return new SqlConnection(_configuration.GetConnectionString("SqlConnection"));
-        }
         public List<Product> GetProducts()
         {
-            SqlConnection conn = GetConnection();
+            SqlConnection conn = GetConnection2();
             List<Product> productList = new List<Product>();
             string statement = "SELECT ProductID, ProductName, Quantity from Products";
             conn.Open();
